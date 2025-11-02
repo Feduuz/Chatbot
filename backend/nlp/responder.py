@@ -28,10 +28,12 @@ def obtener_datos_financieros(intencion, mensaje):
 
     elif intencion == "plazo_fijo":
         tasas = obtener_tasas_bcra()
+        if not tasas:
+            return "⚠️ No pude obtener las tasas de plazo fijo en este momento. Probá más tarde."
         top5 = tasas[:5]
         respuesta = "🏦 Las 5 entidades con la tasa de plazo fijo más alta son:\n\n"
         for t in top5:
-            respuesta += f"{t['banco']}: {t['tasa']}\n"
+            respuesta += f"{t['banco']}: {t['tasa']:.2f}%\n"
         return respuesta
 
     elif intencion == "desconocido":

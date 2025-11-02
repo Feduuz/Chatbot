@@ -1,4 +1,5 @@
 import requests
+import certifi
 import os
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -14,20 +15,33 @@ headers = {
 
 def obtener_tasas_bcra():
     url = "https://www.bcra.gob.ar/BCRAyVos/Plazos_fijos_online.asp"
-    response = requests.get(url)
+    try:
+        response = requests.get(url, verify=certifi.where(), timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error al acceder a la página del BCRA: {e}")
+        return []
+
     soup = BeautifulSoup(response.text, 'html.parser')
-
     tabla = soup.find('table')
-    tasas = []
+    if not tabla:
+        print("No se encontró la tabla de tasas.")
+        return []
 
+    tasas = []
     for fila in tabla.find_all('tr')[1:]:
         columnas = fila.find_all('td')
         if len(columnas) >= 3:
-            banco = columnas[0].text.strip()
-            tasa = columnas[2].text.strip()
-            tasas.append({'banco': banco, 'tasa': tasa})
+            banco = columnas[0].get_text(strip=True)
+            tasa_raw = columnas[2].get_text(strip=True).replace('%', '').replace(',', '.')
+            try:
+                tasa_float = float(tasa_raw)
+                tasas.append({'banco': banco, 'tasa': tasa_float})
+            except ValueError:
+                continue
 
-    return tasas
+    tasas_ordenadas = sorted(tasas, key=lambda x: x['tasa'], reverse=True)
+    return tasas_ordenadas
 
 def obtener_top5_acciones():
     tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]
