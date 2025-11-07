@@ -5,7 +5,8 @@ from data.financial_api import (
     obtener_top5_acciones,
     obtener_listado_acciones,
     obtener_cuentas_remuneradas,
-    obtener_cotizaciones_dolar
+    obtener_cotizaciones_dolar,
+    obtener_riesgo_pais
 )
 
 def obtener_datos_financieros(intencion, mensaje):
@@ -80,6 +81,17 @@ def obtener_datos_financieros(intencion, mensaje):
             respuesta += f"🟢 Compra: ${c['compra']}<br>"
             respuesta += f"🔴 Venta: ${c['venta']}<br>"
             respuesta += f"🕒 Última actualización: {c['fechaActualizacion']}<br><br>"
+
+        return respuesta
+
+    elif intencion == "riesgo_pais":
+        datos = obtener_riesgo_pais()
+        if not datos:
+            return "⚠️ No pude obtener el valor del Riesgo País en este momento."
+
+        respuesta = "<b>📊 Índice de Riesgo País (Argentina)</b><br><br>"
+        respuesta += f"🇦🇷 Valor actual: <b>{datos['valor']}</b> puntos<br>"
+        respuesta += f"🕒 Última actualización: {datos['fecha']}<br>"
 
         return respuesta
 

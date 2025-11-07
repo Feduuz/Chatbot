@@ -13,5 +13,7 @@ def procesar_texto(mensaje):
         return "cuenta_remunerada"
     elif any(palabra in mensaje for palabra in ["dolar", "dólar", "usd"]):
         return "dolar"
+    elif "riesgo país" in mensaje or "riesgo pais" in mensaje:
+        return "riesgo_pais"
     else:
         return "desconocido"

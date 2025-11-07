@@ -189,3 +189,30 @@ def obtener_cotizaciones_dolar():
     except Exception as e:
         print(f"⚠️ Error al obtener cotizaciones del dólar: {e}")
         return []
+
+def obtener_riesgo_pais():
+    url = "https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais/ultimo"
+    try:
+        response = requests.get(url, verify=certifi.where(), timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        # Esperado: {"fecha": "2025-11-04", "valor": 2475.0}
+        fecha = data.get("fecha", "")
+        valor = data.get("valor", "N/D")
+
+        # 🕒 Formatear la fecha
+        try:
+            fecha_dt = datetime.fromisoformat(fecha.replace("Z", "+00:00"))
+            fecha_formateada = fecha_dt.strftime("%Y-%m-%d, %H:%M:%S")
+        except Exception:
+            fecha_formateada = fecha
+
+        return {
+            "valor": valor,
+            "fecha": fecha_formateada
+        }
+
+    except Exception as e:
+        print(f"⚠️ Error al obtener Riesgo País: {e}")
+        return None
