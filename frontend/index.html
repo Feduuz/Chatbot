@@ -17,7 +17,15 @@
             <div class="messages-container">
                 <div class="message-box left">
                     <p>¡Hola! Soy tu asistente financiero 🤖.</p>
-                    <p>Mencioname sobre qué te gustaría enterarte: Criptomonedas, acciones, cuentas remuneradas, dólar, riesgo país o plazos fijos.</p>
+                    <p>Mencioname sobre qué te gustaría enterarte:</p>
+                        <div class="button-options">
+                            <button class="option-btn">Criptomonedas 💰</button>
+                            <button class="option-btn">Acciones 📈</button>
+                            <button class="option-btn">Cuentas remuneradas 💵</button>
+                            <button class="option-btn">Dólar 💸</button>
+                            <button class="option-btn">Riesgo País 📊</button>
+                            <button class="option-btn">Plazo Fijo 🏦</button>
+                        </div>
                 </div>
             </div>
             <div class="message-input">
@@ -29,48 +37,64 @@
         </div>
         </div>
 
-        <script>
-            document.querySelector(".button-send").addEventListener("click", function(e) {
-                e.preventDefault();
-                const message = document.querySelector(".message-send").value;
+<script>
+    function sendMessageToBot(message) {
+        const container = document.querySelector(".messages-container");
 
-                fetch("/send_message", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ message: message })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.querySelector(".messages-container");
+        const userBox = document.createElement("div");
+        userBox.className = "message-box right";
+        userBox.innerHTML = `<p>${message}</p>`;
+        container.appendChild(userBox);
 
-                    const userBox = document.createElement("div");
-                    userBox.className = "message-box right";
-                    userBox.innerHTML = `<p>${message}</p>`;
-                    container.appendChild(userBox);
+        // Llamada al backend Flask
+        fetch("/send_message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const botBox = document.createElement("div");
+            botBox.className = "message-box left";
+            botBox.innerHTML = `<p>${data.response}</p>`;
+            container.appendChild(botBox);
 
-                    const botBox = document.createElement("div");
-                    botBox.className = "message-box left";
-                    botBox.innerHTML = `<p>${data.response}</p>`;
-                    container.appendChild(botBox);
+            container.scrollTop = container.scrollHeight;
+        });
+    }
 
-                    document.querySelector(".message-send").value = "";
+    document.querySelector(".button-send").addEventListener("click", function(e) {
+        e.preventDefault();
+        const messageInput = document.querySelector(".message-send");
+        const message = messageInput.value.trim();
+        if (!message) return;
 
-                    container.scrollTop = container.scrollHeight;
-                });
-            });
+        sendMessageToBot(message);
+        messageInput.value = "";
+    });
 
-                const inputField = document.querySelector(".message-send");
-                const sendButton = document.querySelector(".button-send");
+    // Enviar mensaje al presionar Enter
+    const inputField = document.querySelector(".message-send");
+    const sendButton = document.querySelector(".button-send");
 
-                inputField.addEventListener("keydown", function(e) {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        sendButton.click();
-                    }
-                });
-        </script>
+    inputField.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendButton.click();
+        }
+    });
+
+    // Detectar clics en los botones de opciones
+    document.addEventListener("click", function(e) {
+        if (e.target.classList.contains("option-btn")) {
+            const message = e.target.textContent.split(" ")[0];
+            sendMessageToBot(message);
+        }
+    });
+</script>
+
     </body>
     
 </html>

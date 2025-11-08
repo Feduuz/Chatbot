@@ -8,6 +8,28 @@ body {
   font-family: Arial, sans-serif;
 }
 
+.button-options {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option-btn {
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.option-btn:hover {
+  background-color: #005fa3;
+}
+
 .card-container {
   background-color: #fff;
   border-radius: 15px;

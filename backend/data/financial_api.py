@@ -162,16 +162,16 @@ def obtener_cotizaciones_dolar():
             venta = d.get("venta")
             fecha = d.get("fechaActualizacion", "")
 
-            # 🕒 Formatear la fecha (de 2025-11-04T15:05:00Z → 2025-11-04, 15:05:00)
+            # Formateo de fecha
             try:
                 fecha_dt = datetime.fromisoformat(fecha.replace("Z", "+00:00"))
                 fecha_formateada = fecha_dt.strftime("%Y-%m-%d, %H:%M:%S")
             except Exception:
                 fecha_formateada = fecha
 
-            # 💳 Si es Dólar Tarjeta, no mostrar "compra"
+            # Si es Dólar Tarjeta, no mostrar valor compra
             if "tarjeta" in nombre.lower():
-                compra = "---"
+                compra = " ---"
 
             cotizaciones.append({
                 "nombre": nombre,
@@ -181,10 +181,6 @@ def obtener_cotizaciones_dolar():
             })
 
         return cotizaciones
-
-    except Exception as e:
-        print(f"⚠️ Error al obtener cotizaciones del dólar: {e}")
-        return []
 
     except Exception as e:
         print(f"⚠️ Error al obtener cotizaciones del dólar: {e}")
@@ -201,7 +197,7 @@ def obtener_riesgo_pais():
         fecha = data.get("fecha", "")
         valor = data.get("valor", "N/D")
 
-        # 🕒 Formatear la fecha
+        #  Formateo de fecha
         try:
             fecha_dt = datetime.fromisoformat(fecha.replace("Z", "+00:00"))
             fecha_formateada = fecha_dt.strftime("%Y-%m-%d, %H:%M:%S")
