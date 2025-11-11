@@ -8,6 +8,7 @@ from data.financial_api import (
     obtener_cuentas_remuneradas,
     obtener_cotizaciones_dolar,
     obtener_riesgo_pais,
+    obtener_riesgo_pais_historico,
     obtener_indice_inflacion,
     obtener_indice_inflacion_interanual
 )
@@ -94,6 +95,89 @@ def obtener_datos_financieros(intencion, mensaje):
         respuesta = "<b>📊 Índice de Riesgo País (Argentina)</b><br><br>"
         respuesta += f"🇦🇷 Valor actual: <b>{datos['valor']}</b> puntos<br>"
         respuesta += f"🕒 Última actualización: {datos['fecha']}<br>"
+
+        respuesta += """
+        <div class='button-options'>
+            <button class='option-btn' data-intent='historico'>Histórico 📈</button>
+            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+        </div>
+        """
+
+        return respuesta
+
+    elif intencion == "riesgo_pais_historico":
+        datos = obtener_riesgo_pais()
+        fechas, valores = obtener_riesgo_pais_historico()
+
+        if not datos or not fechas:
+            return "⚠️ No pude obtener los datos del Riesgo País en este momento."
+
+        respuesta = "<b>📊 Índice de Riesgo País (Argentina)</b><br><br>"
+        respuesta += f"🇦🇷 Valor actual: <b>{datos['valor']}</b> puntos<br>"
+        respuesta += f"🕒 Última actualización: {datos['fecha']}<br><br>"
+        respuesta += "📈 Evolución histórica:<br>"
+        respuesta += "<canvas id='riesgoPaisChart' width='900' height='350'></canvas>"
+
+        # Gráfico JS embebido
+        respuesta += f"""
+        <script>
+            if (!Chart.registry.plugins.get('zoom')) {{
+                Chart.register(window['chartjs-plugin-zoom']);
+            }}
+            const ctx3 = document.getElementById('riesgoPaisChart').getContext('2d');
+
+            window.riesgoPaisChart = new Chart(ctx3, {{
+                type: 'line',
+                data: {{
+                    labels: {json.dumps(fechas)},
+                    datasets: [{{
+                        label: 'Riesgo País (puntos)',
+                        data: {json.dumps(valores)},
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    scales: {{
+                        x: {{
+                            ticks: {{ color: '#ccc' }},
+                            grid: {{ display: false }}
+                        }},
+                        y: {{
+                            ticks: {{ color: '#ccc' }},
+                            grid: {{ color: 'rgba(255,255,255,0.1)' }}
+                        }}
+                    }},
+                    plugins: {{
+                        legend: {{
+                            labels: {{ color: '#ccc' }}
+                        }},
+                        zoom: {{
+                            pan: {{
+                                enabled: true,
+                                mode: 'x'
+                            }},
+                            zoom: {{
+                                wheel: {{ enabled: true }},
+                                pinch: {{ enabled: true }},
+                                mode: 'x'
+                            }},
+                            limits: {{
+                                x: {{ minRange: 6 }}
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        </script>
+
+        <div class='button-options'>
+            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+        </div>
+        """
 
         return respuesta
 

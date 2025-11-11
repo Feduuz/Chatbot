@@ -193,16 +193,15 @@ def obtener_riesgo_pais():
         response.raise_for_status()
         data = response.json()
 
-        # Esperado: {"fecha": "2025-11-04", "valor": 2475.0}
         fecha = data.get("fecha", "")
         valor = data.get("valor", "N/D")
 
-        #  Formateo de fecha
+        # Formateo de fecha
         try:
             fecha_dt = datetime.fromisoformat(fecha.replace("Z", "+00:00"))
             fecha_formateada = fecha_dt.strftime("%Y-%m-%d, %H:%M:%S")
         except Exception:
-            fecha_formateada = fecha
+                fecha_formateada = fecha
 
         return {
             "valor": valor,
@@ -212,6 +211,31 @@ def obtener_riesgo_pais():
     except Exception as e:
         print(f"⚠️ Error al obtener Riesgo País: {e}")
         return None
+
+def obtener_riesgo_pais_historico():
+    url = "https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais"
+    try:
+        response = requests.get(url, verify=certifi.where(), timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        fechas = [item.get("fecha") for item in data if "fecha" in item]
+        valores = [item.get("valor") for item in data if "valor" in item]
+
+        fechas_legibles = []
+        for f in fechas:
+            try:
+                fecha_dt = datetime.fromisoformat(f.replace("Z", "+00:00"))
+                fechas_legibles.append(fecha_dt.strftime("%Y-%m-%d"))
+            except Exception:
+                fechas_legibles.append(f)
+
+        return fechas_legibles, valores
+
+    except Exception as e:
+        print(f"⚠️ Error al obtener Riesgo País histórico: {e}")
+        return None, None
+
 
 def obtener_indice_inflacion():
     url = "https://api.argentinadatos.com/v1/finanzas/indices/inflacion"

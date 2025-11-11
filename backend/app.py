@@ -9,7 +9,13 @@ from data.financial_api import (
     obtener_listado_criptos,
     obtener_tasas_plazofijo,
     obtener_top5_acciones,
-    obtener_listado_acciones
+    obtener_listado_acciones,
+    obtener_cuentas_remuneradas,
+    obtener_cotizaciones_dolar,
+    obtener_riesgo_pais,
+    obtener_riesgo_pais_historico,
+    obtener_indice_inflacion,
+    obtener_indice_inflacion_interanual
 )
 
 # CONFIGURACIÓN DE FLASK Y BASE DE DATOS
