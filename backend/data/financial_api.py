@@ -240,3 +240,29 @@ def obtener_indice_inflacion():
     except Exception as e:
         print(f"⚠️ Error al obtener índice de inflación: {e}")
         return None, None, None
+
+def obtener_indice_inflacion_interanual():
+    url = "https://api.argentinadatos.com/v1/finanzas/indices/inflacionInteranual"
+    try:
+        response = requests.get(url, verify=certifi.where(), timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        registros = [d for d in data if "fecha" in d and "valor" in d]
+        registros_ordenados = sorted(registros, key=lambda x: x["fecha"])
+
+        if not registros_ordenados:
+            return None, None, None
+
+        fechas = [r["fecha"] for r in registros_ordenados]
+        valores = [r["valor"] for r in registros_ordenados]
+
+        ultimo = registros_ordenados[-1]
+        fecha_ultima = ultimo["fecha"]
+        valor_ultimo = ultimo["valor"]
+
+        return fechas, valores, {"fecha": fecha_ultima, "valor": valor_ultimo}
+
+    except Exception as e:
+        print(f"⚠️ Error al obtener índice de inflación interanual: {e}")
+        return None, None, None

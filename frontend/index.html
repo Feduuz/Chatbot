@@ -125,7 +125,7 @@
     // Detectar clics en botones de opciones del chat
     document.addEventListener("click", function(e) {
         if (e.target.classList.contains("option-btn")) {
-            const message = e.target.textContent.split(" ")[0];
+            const message = e.target.getAttribute("data-intent") || e.target.textContent.trim();
             sendMessageToBot(message);
         }
     });

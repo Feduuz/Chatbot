@@ -8,7 +8,8 @@ from data.financial_api import (
     obtener_cuentas_remuneradas,
     obtener_cotizaciones_dolar,
     obtener_riesgo_pais,
-    obtener_indice_inflacion
+    obtener_indice_inflacion,
+    obtener_indice_inflacion_interanual
 )
 
 def obtener_datos_financieros(intencion, mensaje):
@@ -105,7 +106,7 @@ def obtener_datos_financieros(intencion, mensaje):
         respuesta += f"📆 Último dato: <b>{ultimo['fecha']}</b><br>"
         respuesta += f"💸 Inflación: <b>{ultimo['valor']}%</b><br><br>"
         respuesta += "📊 Evolución histórica:<br>"
-        respuesta += "<canvas id='inflacionChart' width='800' height='350'></canvas>"
+        respuesta += "<canvas id='inflacionChart' width='900' height='350'></canvas>"
 
         # Gráfico en formato JS embebido
         respuesta += f"""
@@ -159,8 +160,101 @@ def obtener_datos_financieros(intencion, mensaje):
                         }}
                     }}
                 }}
+            }});         
+        </script>
+        <div class='button-options'>
+            <button class='option-btn' data-intent='interanual'>Inflación Interanual 📅</button>
+            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+        </div>           
+        """
+        return respuesta
+
+    elif intencion == "inflacion interanual" or "interanual" in mensaje.lower():
+        fechas, valores, ultimo = obtener_indice_inflacion_interanual()
+        if not fechas:
+            return "⚠️ No pude obtener los datos de inflación interanual."
+
+        respuesta = "<b>📆 Índice de Inflación Interanual (Argentina)</b><br><br>"
+        respuesta += f"📅 Último dato: <b>{ultimo['fecha']}</b><br>"
+        respuesta += f"💸 Inflación Interanual: <b>{ultimo['valor']}%</b><br><br>"
+        respuesta += "📊 Evolución histórica:<br>"
+        respuesta += "<canvas id='inflacionInteranualChart' width='900' height='350'></canvas>"
+
+        respuesta += f"""
+        <script>
+            if (!Chart.registry.plugins.get('zoom')) {{
+                Chart.register(window['chartjs-plugin-zoom']);
+            }}
+            const ctx2 = document.getElementById('inflacionInteranualChart').getContext('2d');
+            new Chart(ctx2, {{
+                type: 'line',
+                data: {{
+                    labels: {json.dumps(fechas)},
+                    datasets: [{{
+                        label: 'Inflación interanual (%)',
+                        data: {json.dumps(valores)},
+                        borderColor: '#ff7f50',
+                        backgroundColor: 'rgba(255, 127, 80, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    scales: {{
+                        x: {{
+                            ticks: {{ color: '#ccc' }},
+                            grid: {{ display: false }}
+                        }},
+                        y: {{
+                            ticks: {{ color: '#ccc' }},
+                            grid: {{ color: 'rgba(255,255,255,0.1)' }}
+                        }}
+                    }},
+                    plugins: {{
+                        legend: {{
+                            labels: {{ color: '#ccc' }}
+                        }},
+                        zoom: {{
+                            pan: {{
+                                enabled: true,
+                                mode: 'x'
+                            }},
+                            zoom: {{
+                                wheel: {{ enabled: true }},
+                                pinch: {{ enabled: true }},
+                                mode: 'x'
+                            }},
+                            limits: {{
+                                x: {{ minRange: 6 }}
+                            }}
+                        }}
+                    }}
+                }}
             }});
         </script>
+        """
+
+        respuesta += """
+        <div class='button-options'>
+            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+        </div>
+        """
+        return respuesta
+
+    elif intencion == "inicio" or "inicios" in mensaje:
+        respuesta = """
+        <b>🏠 Menú principal</b><br><br>
+        Seleccioná una categoría para explorar:<br><br>
+        <div class='button-options'>
+            <button class='option-btn' data-intent='criptomoneda'>Criptomonedas 💰</button>
+            <button class='option-btn' data-intent='acciones'>Acciones 📈</button>
+            <button class='option-btn' data-intent='plazo fijo'>Plazo Fijo 🏦</button>
+            <button class='option-btn' data-intent='cuenta remunerada'>Cuentas Remuneradas 💵</button>
+            <button class='option-btn' data-intent='dolar'>Dólar 💲</button>
+            <button class='option-btn' data-intent='riesgo pais'>Riesgo País 📊</button>
+            <button class='option-btn' data-intent='inflacion'>Inflación 📉</button>
+        </div>
         """
         return respuesta
 
