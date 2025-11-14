@@ -10,7 +10,8 @@ from data.financial_api import (
     obtener_riesgo_pais,
     obtener_riesgo_pais_historico,
     obtener_indice_inflacion,
-    obtener_indice_inflacion_interanual
+    obtener_indice_inflacion_interanual,
+    obtener_indice_uva
 )
 
 def obtener_datos_financieros(intencion, mensaje):
@@ -98,8 +99,8 @@ def obtener_datos_financieros(intencion, mensaje):
 
         respuesta += """
         <div class='button-options'>
-            <button class='option-btn' data-intent='historico'>Histórico 📈</button>
-            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+            <button class='option-btn' data-intent='Historico'>Histórico 📈</button>
+            <button class='option-btn' data-intent='Inicio'>Inicio 🏠</button>
         </div>
         """
 
@@ -175,7 +176,7 @@ def obtener_datos_financieros(intencion, mensaje):
         </script>
 
         <div class='button-options'>
-            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+            <button class='option-btn' data-intent='Inicio'>Inicio 🏠</button>
         </div>
         """
 
@@ -192,7 +193,6 @@ def obtener_datos_financieros(intencion, mensaje):
         respuesta += "📊 Evolución histórica:<br>"
         respuesta += "<canvas id='inflacionChart' width='900' height='350'></canvas>"
 
-        # Gráfico en formato JS embebido
         respuesta += f"""
         <script>
             if (!Chart.registry.plugins.get('zoom')) {{
@@ -247,8 +247,8 @@ def obtener_datos_financieros(intencion, mensaje):
             }});         
         </script>
         <div class='button-options'>
-            <button class='option-btn' data-intent='interanual'>Inflación Interanual 📅</button>
-            <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
+            <button class='option-btn' data-intent='Interanual'>Inflación Interanual 📅</button>
+            <button class='option-btn' data-intent='Inicio'>Inicio 🏠</button>
         </div>           
         """
         return respuesta
@@ -321,6 +321,79 @@ def obtener_datos_financieros(intencion, mensaje):
 
         respuesta += """
         <div class='button-options'>
+            <button class='option-btn' data-intent='Inicio'>Inicio 🏠</button>
+        </div>
+        """
+        return respuesta
+
+    elif intencion == "uva":
+        fechas, valores, ultimo = obtener_indice_uva()
+        if not fechas:
+            return "⚠️ No pude obtener los datos del índice UVA en este momento."
+
+        respuesta = "<b>🏠 Valor de la Unidad de Valor Adquisitivo (UVA)</b><br><br>"
+        respuesta += f"📆 Último valor: <b>${ultimo['valor']:.2f}</b><br>"
+        respuesta += f"📅 Fecha: <b>{ultimo['fecha']}</b><br><br>"
+        respuesta += "📊 Evolución histórica:<br>"
+        respuesta += "<canvas id='uvaChart' width='900' height='350'></canvas>"
+
+        respuesta += f"""
+        <script>
+            if (!Chart.registry.plugins.get('zoom')) {{
+                Chart.register(window['chartjs-plugin-zoom']);
+            }}
+            const ctxUVA = document.getElementById('uvaChart').getContext('2d');
+            new Chart(ctxUVA, {{
+                type: 'line',
+                data: {{
+                    labels: {json.dumps(fechas)},
+                    datasets: [{{
+                        label: 'Valor UVA ($)',
+                        data: {json.dumps(valores)},
+                        borderColor: '#ffc107', // Color Amarillo/Ámbar
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    scales: {{
+                        x: {{
+                            ticks: {{ color: '#ccc' }},
+                            grid: {{ display: false }}
+                        }},
+                        y: {{
+                            ticks: {{ color: '#ccc' }},
+                            grid: {{ color: 'rgba(255,255,255,0.1)' }}
+                        }}
+                    }},
+                    plugins: {{
+                        legend: {{
+                            labels: {{ color: '#ccc' }}
+                        }},
+                        zoom: {{
+                            pan: {{
+                                enabled: true,
+                                mode: 'x'
+                            }},
+                            zoom: {{
+                                wheel: {{ enabled: true }},
+                                pinch: {{ enabled: true }},
+                                mode: 'x'
+                            }},
+                            limits: {{
+                                x: {{ minRange: 6 }}
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        </script>
+        """
+
+        respuesta += """
+        <div class='button-options'>
             <button class='option-btn' data-intent='inicio'>Inicio 🏠</button>
         </div>
         """
@@ -331,17 +404,17 @@ def obtener_datos_financieros(intencion, mensaje):
         <b>🏠 Menú principal</b><br><br>
         Seleccioná una categoría para explorar:<br><br>
         <div class='button-options'>
-            <button class='option-btn' data-intent='criptomoneda'>Criptomonedas 💰</button>
-            <button class='option-btn' data-intent='acciones'>Acciones 📈</button>
-            <button class='option-btn' data-intent='plazo fijo'>Plazo Fijo 🏦</button>
-            <button class='option-btn' data-intent='cuenta remunerada'>Cuentas Remuneradas 💵</button>
-            <button class='option-btn' data-intent='dolar'>Dólar 💲</button>
-            <button class='option-btn' data-intent='riesgo pais'>Riesgo País 📊</button>
-            <button class='option-btn' data-intent='inflacion'>Inflación 📉</button>
+            <button class='option-btn' data-intent='Criptomoneda'>Criptomonedas 💰</button>
+            <button class='option-btn' data-intent='Acciones'>Acciones 📈</button>
+            <button class='option-btn' data-intent='Plazo fijo'>Plazo Fijo 🏦</button>
+            <button class='option-btn' data-intent='Cuenta remunerada'>Cuentas Remuneradas 💵</button>
+            <button class='option-btn' data-intent='Dolar'>Dólar 💲</button>
+            <button class='option-btn' data-intent='Riesgo pais'>Riesgo País 📊</button>
+            <button class='option-btn' data-intent='Inflacion'>Inflación 📉</button>
+            <button class='option-btn' data-intent='Uva'>Índice UVA 📅</button>
         </div>
         """
         return respuesta
-
 
     elif intencion == "desconocido":
         return "No entendí muy bien 🤔. Probá preguntarme sobre criptomonedas, acciones, cuentas remuneradas o plazos fijos."

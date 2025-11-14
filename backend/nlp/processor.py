@@ -21,5 +21,7 @@ def procesar_texto(mensaje):
         return "inflacion"
     elif any(palabra in mensaje for palabra in ["inicio", "opciones", "home"]):  
         return "inicio"
+    elif any(palabra in mensaje for palabra in ["índice UVA", "indice UVA", "uva"]):
+        return "uva"
     else:
         return "desconocido"
