@@ -95,6 +95,19 @@ body.dark-mode::before {
 
 }
 
+.card-body .message-input form {
+    display: flex;
+    width: 100%;
+    align-items: flex-end;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.message-send {
+    flex-grow: 1; 
+    resize: none;
+}
 .messages-container {
   padding: 15px;
   display: flex;
@@ -109,7 +122,6 @@ body.dark-mode::before {
   border-radius: 10px;
   max-width: 70%;  
 }
-
 
 .message-box.left {
   background-color: #f1f1f1;
@@ -135,9 +147,10 @@ body.dark-mode::before {
 
 .message-input form {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 10px;
-  margin-right: 16px;
+  margin-right: 0;
 }
 
 .message-input .message-send {
@@ -167,6 +180,43 @@ body.dark-mode::before {
   color: #333;
 }
 
+.button-voice {
+    background-color: #2a2a2a;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px; 
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 0;
+    transition: background-color 0.3s, transform 0.3s;
+    flex-shrink: 0;
+    margin-bottom: 5px;
+}
+
+.button-voice:hover {
+    background-color: #fff;
+}
+
+.button-voice.active {
+    background-color: #dc3545;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.button-send {
+    flex-shrink: 0; 
+    margin-bottom: 5px;
+}
 .main-header {
   position: fixed;
   top: 20px;
@@ -222,7 +272,7 @@ body.dark-mode::before {
   background-position: 100%;
 }
 
-/* 🌙 MODO OSCURO */
+/* MODO OSCURO */
 body.dark-mode {
   background-color: #121212;
   color: #f1f1f1;
@@ -256,4 +306,17 @@ body.dark-mode .message-input .button-send {
 
 body.dark-mode .message-input .button-send:hover {
   background-color: #005fa3;
+}
+
+body.dark-mode .button-voice {
+  background-color: #0078d4;
+  color: white;
+}
+
+body.dark-mode .button-voice:hover {
+  background-color: #005fa3;
+}
+
+body.dark-mode .button-voice.active {
+  background-color: #dc3545;
 }

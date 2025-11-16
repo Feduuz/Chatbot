@@ -69,12 +69,76 @@
     });
 
     const inputField = document.querySelector(".message-send");
+    const voiceBtn = document.getElementById('voice-command-btn');
     inputField.addEventListener("keydown", function(e) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             document.querySelector(".button-send").click();
         }
     });
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'es-AR';
+
+    function resetRecognitionState() {
+            isListening = false;
+            voiceBtn.classList.remove('active');
+            voiceBtn.textContent = '🎙️';
+            if (inputField.value === '🎤 Escuchando... Di tu pregunta.') {
+                inputField.value = '';
+            }
+        }
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        console.log('🗣️ Voz reconocida:', transcript);
+        
+        // Muestra el texto en el input y lo envía al backend
+        inputField.value = transcript; 
+        sendMessageToBot(transcript);
+    };
+
+    recognition.onerror = function(event) {
+        console.error('⚠️ Error en reconocimiento de voz:', event.error);
+        if (event.error === 'not-allowed') {
+            alert('Permiso de micrófono denegado. Por favor, habilite el micrófono para el sitio.');
+        } else if (event.error !== 'no-speech') {
+             renderBotMessage('<p class="error-message">Hubo un error con el reconocimiento de voz. Intente de nuevo.</p>');
+        }
+    };
+
+    recognition.onend = function() {
+            console.log('🛑 Reconocimiento de voz finalizado.');
+            resetRecognitionState();
+        };
+
+    voiceBtn.addEventListener('click', () => {
+        if (isListening) {
+            recognition.stop();
+        } else {
+            try {
+                recognition.start();
+                isListening = true;
+                voiceBtn.classList.add('active');
+                voiceBtn.textContent = '🔴';
+                inputField.value = '🎤 Escuchando... Di tu pregunta.';
+            } catch (e) {
+                console.error('No se pudo iniciar el reconocimiento de voz:', e);
+                resetRecognitionState();
+            }
+        }
+    });
+
+    } else {
+        console.warn('⚠️ Web Speech API no soportada en este navegador.');
+        voiceBtn.style.display = 'none';
+    }
 
     // Detectar clics en botones de opciones del chat
     document.addEventListener("click", function(e) {
