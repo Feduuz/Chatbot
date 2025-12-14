@@ -131,18 +131,26 @@ def obtener_cuentas_remuneradas():
             return []
 
         cuentas = []
-        for item in data[:5]:  # top 5
-            entidad = item.get("fondo", "Entidad desconocida")
-            tna = item.get("tna", 0)
-            tope = item.get("tope", "Sin tope")
+
+        for item in data:
+            tna = item.get("tna")
+
+            if tna is None:
+                continue
 
             cuentas.append({
-                "entidad": entidad,
-                "tna": tna,
-                "tope": tope
+                "entidad": item.get("fondo", "Entidad desconocida"),
+                "tna": float(tna),
+                "tope": item.get("tope")
             })
 
-        return cuentas
+        cuentas_ordenadas = sorted(
+            cuentas,
+            key=lambda x: x["tna"],
+            reverse=True
+        )
+
+        return cuentas_ordenadas[:5]
 
     except Exception as e:
         print(f"⚠️ Error al obtener cuentas remuneradas: {e}")
