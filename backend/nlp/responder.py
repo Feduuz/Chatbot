@@ -24,7 +24,7 @@ def _agregar_boton_inicio(respuesta_actual):
         </div>
     """
 
-def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
+def obtener_datos_financieros(intencion, mensaje, context=None, entities=None, raw=False):
     mensaje = mensaje.lower()
     entities = entities or {}
     respuesta = ""
@@ -34,6 +34,14 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
 
     elif intencion == "criptomoneda":
         top5 = obtener_top5_criptos()
+
+        if raw:
+            return {
+                "tipo": "criptomonedas",
+                "datos": top5,
+                "fuente": "CoinGecko"
+            }
+        
         respuesta = "<b>💰 Las 5 criptomonedas con mayor capitalización son:</b><br><br>"
         for i, cripto in enumerate(top5, start=1):
             respuesta += f"{i}° {cripto}<br>"
@@ -41,6 +49,13 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
 
     elif intencion == "acciones":
         top5 = obtener_top5_acciones()
+
+        if raw:
+            return {
+                "tipo": "acciones",
+                "datos": top5,
+                "fuente": "Yahoo Finance"
+            }
         respuesta = "<b>📈 Las 5 acciones con mayor capitalización son:</b><br><br>"
         for i, accion in enumerate(top5, start=1):
             respuesta += f"{i}° {accion}<br>"
@@ -48,6 +63,16 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
 
     elif intencion == "plazo_fijo":
         top_clientes, top_no_clientes = obtener_tasas_plazofijo()
+
+        if raw:
+            return {
+                "tipo": "plazo_fijo",
+                "datos": {
+                    "clientes": top_clientes,
+                    "no_clientes": top_no_clientes
+                },
+                "fuente": "BCRA"
+            }
         if not top_clientes and not top_no_clientes:
             return "⚠️ No pude obtener las tasas de plazo fijo en este momento. Probá más tarde."
 
@@ -67,11 +92,18 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
 
     elif intencion == "cuenta_remunerada":
         cuentas = obtener_cuentas_remuneradas()
+
+        if raw:
+            return {
+                "tipo": "cuentas_remuneradas",
+                "datos": cuentas,
+                "fuente": "Bancos / Fintechs"
+            }
         if not cuentas:
             return "⚠️ No pude obtener los datos de cuentas remuneradas en este momento."
 
         respuesta = "<b>💵 Top 5 Cuentas Remuneradas (según ArgentinaDatos):</b><br><br>"
-        for i, c in enumerate(cuentas, start=1):
+        for i, c in enumerate(cuentas[:5], start=1):
             respuesta += f"{i}° <b>{c['entidad']}</b><br>"
             respuesta += f"🏦 TNA: {c['tna'] * 100:.2f}%<br>"
             tope = c['tope']
@@ -81,6 +113,13 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
 
     elif intencion == "dolar":
         cotizaciones = obtener_cotizaciones_dolar()
+
+        if raw:
+            return {
+                "tipo": "cotizaciones_dolar",
+                "datos": cotizaciones,
+                "fuente": "Ámbito / BCRA"
+            }
         if not cotizaciones:
             return "⚠️ No pude obtener las cotizaciones del dólar en este momento."
 
@@ -383,7 +422,7 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
         """
 
 
-    elif intencion == "inflacion interanual" or "interanual" in mensaje.lower():
+    elif intencion == "inflacion_interanual":
         fechas, valores, ultimo = obtener_indice_inflacion_interanual()
         if not fechas:
             return "⚠️ No pude obtener los datos de inflación interanual."
@@ -526,15 +565,16 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None):
         <b>🏠 Menú principal</b><br><br>
         Seleccioná una categoría para explorar:<br><br>
         <div class='button-options'>
-            <button class='option-btn' data-intent='Criptomoneda'>Criptomonedas 🪙</button>
-            <button class='option-btn' data-intent='Acciones'>Acciones 📈</button>
-            <button class='option-btn' data-intent='Plazo fijo'>Plazo Fijo 🏦</button>
-            <button class='option-btn' data-intent='Cuenta remunerada'>Cuentas Remuneradas 💵</button>
-            <button class='option-btn' data-intent='Dolar'>Dólar 💲</button>
-            <button class='option-btn' data-intent='Dolar historico'>Dólar Histórico 💰</button>
-            <button class='option-btn' data-intent='Riesgo pais'>Riesgo País 📊</button>
-            <button class='option-btn' data-intent='Inflacion'>Inflación 📉</button>
-            <button class='option-btn' data-intent='Uva'>Índice UVA 📅</button>
+            <button class='option-btn' data-intent='acciones'>Acciones 📈</button>
+            <button class='option-btn' data-intent='criptomoneda'>Criptomonedas 🪙</button>
+            <button class='option-btn' data-intent='cuenta remunerada'>Cuentas Remuneradas 💵</button>
+            <button class='option-btn' data-intent='dolar'>Dólar 💲</button>
+            <button class='option-btn' data-intent='dolar_historico'>Dólar Histórico 💰</button>
+            <button class='option-btn' data-intent='inflacion'>Inflación 📉</button>
+            <button class='option-btn' data-intent='plazo fijo'>Plazo Fijo 🏦</button>
+            <button class='option-btn' data-intent='riesgo_pais'>Riesgo País 📊</button>
+            <button class='option-btn' data-intent='riesgo_pais_historico'>Riesgo País Histórico 🧾</button>
+            <button class='option-btn' data-intent='uva'>Índice UVA 📅</button>
         </div>
         """
         return respuesta

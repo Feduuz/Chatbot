@@ -3,7 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 from nlp.responder import obtener_datos_financieros
-from nlp.processor import procesar_texto
+from nlp.processor import procesar_texto, es_consulta_directa
+from nlp.ollama_client import consultar_ollama
+
 from data.financial_api import (
     obtener_top5_criptos,
     obtener_listado_criptos,
@@ -25,9 +27,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:admin@localhost/ch
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "admin")
 
-# Inicialización del ORM
+# INICIALIZACIÓN DEL ORM
 db = SQLAlchemy(app)
-
 
 # MODELOS DE BASE DE DATOS
 class Usuario(db.Model):
@@ -71,12 +72,60 @@ def send_message():
 
     # Procesamiento NLP
     intencion, entities = procesar_texto(mensaje_usuario, context=user_context)
-    if intencion == "desconocido":
-        from nlp.ollama_client import consultar_ollama
-        respuesta_bot = consultar_ollama(mensaje_usuario)
-    else:
-        respuesta_bot = obtener_datos_financieros(intencion, mensaje_usuario, context=user_context, entities=entities)
 
+    INTENCIONES_DIRECTAS = {
+    "acciones",
+    "criptomoneda",
+    "dolar",
+    "dolar_historico",
+    "plazo_fijo",
+    "cuenta_remunerada",
+    "riesgo_pais",
+    "riesgo_pais_historico",
+    "inflacion",
+    "inflacion_interanual",
+    "uva",
+    "inicio",
+    "saludo"
+}
+    if mensaje_usuario in INTENCIONES_DIRECTAS:
+        intencion = mensaje_usuario
+        entities = {}
+    else:
+        intencion, entities = procesar_texto(mensaje_usuario, context=user_context)
+
+    if intencion in INTENCIONES_DIRECTAS:
+        respuesta_bot = obtener_datos_financieros(
+            intencion=intencion,
+            mensaje=mensaje_usuario,
+            context=user_context,
+            entities=entities,
+            raw=False
+        )
+        
+    else:
+        datos = obtener_datos_financieros(
+            intencion=intencion,
+            mensaje=mensaje_usuario,
+            context=user_context,
+            entities=entities,
+            raw=True
+        )
+
+        respuesta_bot = consultar_ollama(
+            mensaje_usuario,
+            contexto_datos=datos
+        )
+
+    user_context["history"].append({
+        "role": "user",
+        "content": mensaje_usuario
+    })
+
+    user_context["history"].append({
+        "role": "assistant",
+        "content": respuesta_bot
+    })
 
     user_context["last_intent"] = intencion
     user_context["entities"] = entities

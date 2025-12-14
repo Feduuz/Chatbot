@@ -12,7 +12,7 @@ INTENT_KEYWORDS = {
     "plazo_fijo": ["plazo fijo", "plazofijo", "plazo", "plazos fijos"],
     "cuenta_remunerada": ["cuenta remunerada", "cuentas remuneradas"],
     "dolar": ["dolar", "dólar", "usd"],
-    "dolar_historico": ["histórico dólar", "dolar histórico", "gráfico dólar", "usd histórico"],
+    "dolar_historico": ["dólar histórico ", "dolar historico", "gráfico dólar", "usd histórico"],
     "riesgo_pais": ["riesgo país", "riesgo pais", "riesgo"],
     "riesgo_pais_historico": ["riesgo país histórico", "riesgo pais historico", "riesgo histórico", "historico", "histórico"],
     "inflacion": ["inflacion", "inflación", "ipc", "inflación mensual"],
@@ -53,20 +53,20 @@ def procesar_texto(mensaje, context=None):
         return "desconocido", {}
 
     mensaje_limpio = limpiar_texto(mensaje)
+    intent_kw = _keyword_intent(mensaje_limpio)
+    if intent_kw:
+        return intent_kw, {}
+
+    # Fallback Semántico
     doc = nlp(mensaje_limpio)
     entities = {}
 
     for ent in doc.ents:
-        if ent.label_ in ("DATE", "FECHA"):
-            entities.setdefault("FECHA", []).append(ent.text)
-        elif ent.label_ in ("PERCENT", "PORCENTAJE"):
-            entities.setdefault("PORCENTAJE", []).append(ent.text)
-        else:
-            entities.setdefault(ent.label_, []).append(ent.text)
+        entities.setdefault(ent.label_, []).append(ent.text)
 
-    # Intent por reconocimiento semántico simple
     best_intent = None
     best_score = 0.0
+
     for intent, keys in INTENT_KEYWORDS.items():
         for k in keys:
             score = nlp(k).similarity(doc)
@@ -75,9 +75,17 @@ def procesar_texto(mensaje, context=None):
                 best_intent = intent
 
     if best_score < 0.65:
-        best_intent = None
-
-    if not best_intent:
         best_intent = "desconocido"
 
     return best_intent, entities
+
+def es_consulta_directa(mensaje):
+    claves = [
+        "ranking",
+        "top",
+        "mejores",
+        "lista",
+        "ver",
+        "mostrar"
+    ]
+    return any(k in mensaje.lower() for k in claves)

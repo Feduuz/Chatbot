@@ -61,7 +61,7 @@ def obtener_top5_acciones():
     return resultados
 
 def obtener_listado_acciones():
-    tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "FB", "JNJ"]  # etc.
+    tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "FB", "JNJ"]
     tickers_sorted = sorted(tickers)
     resultados = []
     import yfinance as yf
@@ -150,7 +150,7 @@ def obtener_cuentas_remuneradas():
             reverse=True
         )
 
-        return cuentas_ordenadas[:5]
+        return cuentas_ordenadas
 
     except Exception as e:
         print(f"⚠️ Error al obtener cuentas remuneradas: {e}")
