@@ -38,7 +38,7 @@
         }, 50);
     }
 
-    function sendMessageToBot(message) {
+    function sendMessageToBot(message, isButton = false) {
         const container = document.querySelector(".messages-container");
 
         // Mostrar el mensaje del usuario
@@ -51,7 +51,10 @@
         fetch("/send_message", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({
+            message: message,
+            is_button: isButton
+            })
         })
         .then(response => response.json())
         .then(data => {
@@ -73,7 +76,7 @@
         const message = input.value.trim();
         if (!message) return;
 
-        sendMessageToBot(message);
+        sendMessageToBot(message, false);
         input.value = "";
     });
 
@@ -155,7 +158,7 @@
 
         if (e.target.classList && e.target.classList.contains("option-btn")) {
             const intent = e.target.getAttribute("data-intent") || e.target.textContent.trim();
-            sendMessageToBot(intent);
+            sendMessageToBot(intent, true);
         }
     });
 

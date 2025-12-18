@@ -415,10 +415,7 @@ def obtener_datos_financieros(intencion, mensaje, context=None, entities=None, r
                     }}
                 }}
             }});        
-        </script>
-        <div class='button-options'>
-            <button class='option-btn' data-intent='Interanual'>Inflación Interanual 📅</button>
-        </div>          
+        </script> 
         """
 
 

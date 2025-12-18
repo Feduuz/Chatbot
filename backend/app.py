@@ -62,6 +62,7 @@ def home():
 def send_message():
     data = request.get_json()
     mensaje_usuario = data.get("message", "").strip()
+    es_boton = data.get("is_button", False)
 
     if not mensaje_usuario:
         return jsonify({"response": "⚠️ No recibí ningún mensaje, escribí algo por favor."})
@@ -70,31 +71,10 @@ def send_message():
 
     user_context = session.get("chat_context", {"last_intent": None, "entities": {}, "history": []})
 
-    # Procesamiento NLP
-    intencion, entities = procesar_texto(mensaje_usuario, context=user_context)
-
-    INTENCIONES_DIRECTAS = {
-    "acciones",
-    "criptomoneda",
-    "dolar",
-    "dolar_historico",
-    "plazo_fijo",
-    "cuenta_remunerada",
-    "riesgo_pais",
-    "riesgo_pais_historico",
-    "inflacion",
-    "inflacion_interanual",
-    "uva",
-    "inicio",
-    "saludo"
-}
-    if mensaje_usuario in INTENCIONES_DIRECTAS:
+    if es_boton:
         intencion = mensaje_usuario
         entities = {}
-    else:
-        intencion, entities = procesar_texto(mensaje_usuario, context=user_context)
 
-    if intencion in INTENCIONES_DIRECTAS:
         respuesta_bot = obtener_datos_financieros(
             intencion=intencion,
             mensaje=mensaje_usuario,
@@ -102,8 +82,14 @@ def send_message():
             entities=entities,
             raw=False
         )
-        
+
+    # Procesamiento NLP
     else:
+        intencion, entities = procesar_texto(
+            mensaje_usuario,
+            context=user_context
+        )
+
         datos = obtener_datos_financieros(
             intencion=intencion,
             mensaje=mensaje_usuario,
@@ -114,8 +100,10 @@ def send_message():
 
         respuesta_bot = consultar_ollama(
             mensaje_usuario,
+            historial=user_context["history"],
             contexto_datos=datos
         )
+
 
     user_context["history"].append({
         "role": "user",
